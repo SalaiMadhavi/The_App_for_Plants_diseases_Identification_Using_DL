@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Dimensions,
@@ -25,6 +25,10 @@ const Home = () => {
   const [prediction, setPrediction] = useState({});
   const [selectedImage, setselectedImage] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    setPrediction({});
+  }, [selectedImage]);
 
   const onUpload = async (image) => {
     setselectedImage(image.uri);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Dimensions,
@@ -7,31 +7,47 @@ import {
   View,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { Camera, getCameraPermissionsAsync } from "expo-camera";
+import { Camera, CameraType } from "expo-camera";
 import * as Permissions from "expo-permissions";
 import { Ionicons } from "@expo/vector-icons";
 
 const { width, height } = Dimensions.get("screen");
 
 const CameraScreen = ({ handleUpload }) => {
+  // const [type, setType] = useState(CameraType.back);
+  // const [permission, requestPermission] = Camera.useCameraPermissions();
+
+  // function toggleCameraType() {
+  //   setType((current) =>
+  //     current === CameraType.back ? CameraType.front : CameraType.back
+  //   );
+  // }
+
   const pickFromCamera = async () => {
     try {
-      const { granted } = await getCameraPermissionsAsync();
+      // Ask the user for the permission to access the camera
+      const { granted } = await ImagePicker.requestCameraPermissionsAsync();
+      console.log(granted);
       if (granted) {
         let data = await ImagePicker.launchCameraAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
           allowsEditing: true,
           aspect: [1, 1],
+          base64: true,
           quality: 1, //1 means high quality
         });
 
-        console.log(data);
-        if (!data.cancelled) {
-          const filenameType = data.uri.split(",")[0].split(":")[1].split(";");
+        console.log(data.assets[0].uri);
+        if (!data.canceled) {
+          const filenameType = data.assets[0].uri
+            .split(",")[0]
+            .split(":")[1]
+            .split(";")[0];
           const payload = {
-            uri: data.uri,
+            uri: data.assets[0].uri,
+            base64: data.assets[0].base64,
             type: filenameType,
-            fileName: `Image.${filenameType[0].split("/")[1]}`,
+            fileName: `Image.${filenameType.split("/")[1]}`,
           };
           handleUpload(payload);
         }
@@ -45,21 +61,27 @@ const CameraScreen = ({ handleUpload }) => {
 
   const pickFromGallery = async () => {
     try {
-      const { granted } = await getCameraPermissionsAsync();
+      const { granted } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (granted) {
         let data = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
           allowsEditing: true,
           aspect: [1, 1],
+          base64: true,
           quality: 1, //1 means high quality
         });
-        console.log(data);
-        if (!data.cancelled) {
-          const filenameType = data.uri.split(",")[0].split(":")[1].split(";");
+        console.log(data.assets[0].uri);
+        if (!data.canceled) {
+          const filenameType = data.assets[0].uri
+            .split(",")[0]
+            .split(":")[1]
+            .split(";")[0];
           const payload = {
-            uri: data.uri,
+            uri: data.assets[0].uri,
+            base64: data.assets[0].base64,
             type: filenameType,
-            fileName: `Image.${filenameType[0].split("/")[1]}`,
+            fileName: `Image.${filenameType.split("/")[1]}`,
           };
           handleUpload(payload);
         }
@@ -73,7 +95,15 @@ const CameraScreen = ({ handleUpload }) => {
 
   return (
     <View style={styles.options}>
-      {/* <Camera></Camera> */}
+      {/* <View style={styles.container}>
+        <Camera style={styles.camera} type={type}>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
+              <Text style={styles.text}>Flip Camera</Text>
+            </TouchableOpacity>
+          </View>
+        </Camera>
+      </View> */}
       <TouchableOpacity shadowless style={styles.tab} onPress={pickFromGallery}>
         <View
           style={{

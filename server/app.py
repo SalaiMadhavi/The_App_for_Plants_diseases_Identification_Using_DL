@@ -30,7 +30,8 @@ with open('./labels.json', 'r') as f:
 # Pre-processing images
 def config_image_file(_image_path):
     try:
-        predict = tf.keras.preprocessing.image.load_img(_image_path, target_size=(224, 224))
+        predict = tf.keras.preprocessing.image.load_img(
+            _image_path, target_size=(224, 224))
         predict_modified = tf.keras.preprocessing.image.img_to_array(predict)
         predict_modified = predict_modified / 255
         predict_modified = np.expand_dims(predict_modified, axis=0)
@@ -62,9 +63,9 @@ def output_prediction(filename):
     index_max = np.argmax(results)
 
     return {
-            "prediction": str(img_classes[index_max]),
-            "probability": str(probability)
-        }
+        "prediction": str(img_classes[index_max]),
+        "probability": str(probability)
+    }
 
 
 # Init app
@@ -153,22 +154,19 @@ def get_disease_prediction():
 
     if not os.path.isdir(target):
         os.mkdir(target)
-        
+
     apiRequest = request.get_json()
     # print(data)
-    
-    data = apiRequest['uri']
+
+    data = apiRequest['base64']
     # print(data)
-    
-    splitdata = data.split(',')
-    # print(splitdata)
-    
+
     filename = apiRequest['fileName']
-    print ("String 1:",filename)
-    
+    print("String 1:", filename)
+
     if data:
         try:
-            convert_and_save(splitdata[1], filename)
+            convert_and_save(data, filename)
 
             print({"message": "Image uploaded successfully", "file_path": filename})
         except Exception as e:
@@ -178,23 +176,25 @@ def get_disease_prediction():
     return jsonify(result)
 
 
-
 def convert_and_save(encoded_string, filename):
     try:
         image_data = base64.b64decode(encoded_string)
-        
+
         path = 'images/'+filename
-        
-        exist = os.path.exists(path);
+
+        exist = os.path.exists(path)
         # print(exist);
-        
+
         with open(path, "wb") as f:
             f.write(image_data)
         # Further processing or saving the image as needed
     except Exception as e:
         print(f"Error decoding and saving image: {str(e)}")
-        
+
+
 # Run Server
 if __name__ == '__main__':
-    app.run(host="192.168.18.17", port=5000)  # Replace the IP address with your own local IP address
-    # app.run(host="192.168.83.112", port=5000)  # Replace the IP address with your own local IP address
+    # Replace the IP address with your own local IP address
+    # app.run(host="192.168.18.17", port=5000)
+    # Replace the IP address with your own local IP address
+    app.run(host="192.168.175.112", port=5000)
